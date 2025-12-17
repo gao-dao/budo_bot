@@ -40,9 +40,8 @@ def get_gemini_client():
     return client
 
 client = get_gemini_client()
-# 'models/' を外し、かつ最新の名称にします
-MODEL_NAME = "gemini-1.5-flash"
-
+# 最新のSDKに最適な名称に変更します
+MODEL_NAME = "gemini-2.0-flash"
 # --- 3. 知識ファイルの読み込みとチャットセッションの初期化 ---
 if "messages" not in st.session_state:
     try:
