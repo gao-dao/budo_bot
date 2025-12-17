@@ -40,9 +40,8 @@ def get_gemini_client():
     return client
 
 client = get_gemini_client()
-# より安定して動作する軽量モデルに変更します
-MODEL_NAME = "gemini-1.5-flash-8b"
-
+# 'models/' を頭に付け加えます
+MODEL_NAME = "models/gemini-1.5-flash-8b"
 
 # --- 3. 知識ファイルの読み込みとチャットセッションの初期化 ---
 if "messages" not in st.session_state:
