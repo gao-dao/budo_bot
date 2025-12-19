@@ -53,9 +53,8 @@ if prompt := st.chat_input("質問を入力してください"):
     # 送信用にシステム指示を結合
     full_prompt = f"{st.session_state.sys_prompt}\n\nユーザーの質問: {prompt}"
 
-    try:
-        # モデル名を 'models/' から始まるフルネームに変更します
-        # これで v1beta API でも正しく認識されます
+try:
+        # モデル名を 'models/gemini-1.5-flash' とフルネームで指定します
         response = client.models.generate_content(
             model="models/gemini-1.5-flash", 
             contents=full_prompt
@@ -64,5 +63,5 @@ if prompt := st.chat_input("質問を入力してください"):
         with st.chat_message("model"):
             st.markdown(answer)
         st.session_state.messages.append({"role": "model", "content": answer})
-    except Exception as e:
+except Exception as e:
         st.error(f"エラーの正体: {e}")
