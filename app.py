@@ -9,12 +9,14 @@ st.title("🥋 心勢会 術理探求 Bot")
 # --- 2. クライアント初期化 ---
 @st.cache_resource
 def get_client():
-    api_key = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
-    if not api_key:
-        st.error("APIキーが見つかりません。")
+    # Secretsから直接読み込むことで、古い環境変数の干渉を完全に防ぎます
+    try:
+        # st.secrets.get ではなく、[] で直接指定して確実に取得します
+        api_key = st.secrets["GEMINI_API_KEY"]
+        return genai.Client(api_key=api_key)
+    except Exception as e:
+        st.error(f"Secretsの読み込みに失敗しました。設定を確認してください。")
         st.stop()
-    # シンプルに初期化
-    return genai.Client(api_key=api_key)
 
 client = get_client()
 
