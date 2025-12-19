@@ -26,21 +26,18 @@ with st.sidebar:
 @st.cache_resource
 def get_gemini_client():
     api_key = os.getenv("GEMINI_API_KEY") 
-    if not api_key:
-        try:
-            api_key = st.secrets["GEMINI_API_KEY"]
-        except KeyError:
-            st.error("エラー: APIキーが設定されていません。")
-            st.stop()
-    if not api_key:
-        st.error("エラー: APIキーが空です。")
-        st.stop()
-        
-    client = genai.Client(api_key=api_key)
+    # 中略（APIキー取得処理）
+    
+    # 修正ポイント：'v1'を指定して、1.5を確実に見つけ出します
+    from google.genai.types import HttpOptions
+    client = genai.Client(
+        api_key=api_key, 
+        http_options=HttpOptions(api_version="v1")
+    )
     return client
 
 client = get_gemini_client()
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-1.5-flash"
 
 # --- 3. 知識ファイルの読み込みとチャットセッションの初期化 ---
 if "messages" not in st.session_state:
