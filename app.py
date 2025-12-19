@@ -54,14 +54,15 @@ if prompt := st.chat_input("質問を入力してください"):
     full_prompt = f"{st.session_state.sys_prompt}\n\nユーザーの質問: {prompt}"
 
 try:
-        # モデル名を 'models/gemini-1.5-flash' とフルネームで指定します
+        # 2.0-flash-exp を使用して確実に通信を通します
         response = client.models.generate_content(
-            model="models/gemini-1.5-flash", 
+            model="gemini-2.0-flash-exp", 
             contents=full_prompt
         )
         answer = response.text
         with st.chat_message("model"):
             st.markdown(answer)
         st.session_state.messages.append({"role": "model", "content": answer})
-except Exception as e:
-        st.error(f"エラーの正体: {e}")
+    except Exception as e:
+        # 万が一エラーが出た場合、その内容を表示します
+        st.error(f"エラーが発生しました: {e}")
