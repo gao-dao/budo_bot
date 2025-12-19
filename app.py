@@ -71,8 +71,8 @@ if "messages" not in st.session_state:
     {knowledge_text}
     """
     
-    # --- 【最重要】400エラーを回避する確実な設定方法 ---
-    # configにクラスを使わず、直接辞書(dict)を渡すことで名前の変換ミスを防ぎます
+    # 【最重要】400エラー（名前変換ミス）を確実に回避する書き方
+    # configにクラス(GenerateContentConfig)を使わず、直接辞書(dict)で渡します
     st.session_state.chat = client.chats.create(
         model=MODEL_NAME,
         config={
@@ -110,5 +110,4 @@ if submitted and user_prompt:
         st.session_state.messages.append({"role": "model", "content": response.text})
         
     except Exception as e:
-        # エラーが出た場合でも、再試行しやすいようにメッセージを表示
         st.error(f"応答中にエラーが発生しました: {e}")
