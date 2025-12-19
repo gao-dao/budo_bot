@@ -54,17 +54,15 @@ if prompt := st.chat_input("質問を入力してください"):
     full_prompt = f"{st.session_state.sys_prompt}\n\nユーザーの質問: {prompt}"
 
     try:
-        # chat機能を使わず、一回ごとに生成する(回数制限エラーを回避しやすい方法)
         response = client.models.generate_content(
             model="gemini-1.5-flash",
             contents=full_prompt
         )
         answer = response.text
-        
         with st.chat_message("model"):
             st.markdown(answer)
         st.session_state.messages.append({"role": "model", "content": answer})
-        
     except Exception as e:
-        st.error("現在、Google APIの制限がかかっている可能性があります。30分ほど時間を置いてから再度お試しください。")
-        st.info("※1.5-flashへの切り替えは完了していますが、前回の2.5での制限がサーバー側に残っている場合があります。")
+        # 固定メッセージではなく、発生している「生のデータ」を表示させます
+        st.error(f"エラーの正体: {e}") 
+        st.info("この上の『エラーの正体』に何と書いてあるか教えてください。")
