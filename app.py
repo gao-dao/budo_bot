@@ -25,7 +25,7 @@ with st.sidebar:
 # --- 2. Gemini クライアントの初期化 ---
 @st.cache_resource
 def get_gemini_client():
-    # 1. 環境変数やStreamlit SecretsからAPIキーを取得
+    # APIキーの取得
     api_key = os.getenv("GEMINI_API_KEY") 
     if not api_key:
         try:
@@ -34,7 +34,7 @@ def get_gemini_client():
             st.error("エラー: APIキーが設定されていません。")
             st.stop()
     
-    # 'v1'を指定して、1.5-flashを確実に見つける設定でクライアントを作成
+    # 'v1'を指定して安定版にアクセス
     from google.genai.types import HttpOptions
     client = genai.Client(
         api_key=api_key, 
@@ -54,7 +54,7 @@ if "messages" not in st.session_state:
         st.error("知識ファイルが見つかりません。")
         knowledge_text = ""
 
-    # システム指示を定義
+    # システム指示（キャラクター設定）の定義
     sys_instruction = f"""
     あなたは琉球古伝空手心勢会の代表です。
     以下の知識ベースに基づき、誠実かつ簡潔に応答してください。
@@ -71,9 +71,8 @@ if "messages" not in st.session_state:
     {knowledge_text}
     """
     
-    # 【修正の核心】
-    # GenerateContentConfigを使わず、直接辞書で渡すことで
-    # "systemInstruction" という自動変換によるエラーを防ぎます。
+    # --- 【最重要】400エラーを回避する確実な設定方法 ---
+    # configにクラスを使わず、直接辞書(dict)を渡すことで名前の変換ミスを防ぎます
     st.session_state.chat = client.chats.create(
         model=MODEL_NAME,
         config={
@@ -111,4 +110,5 @@ if submitted and user_prompt:
         st.session_state.messages.append({"role": "model", "content": response.text})
         
     except Exception as e:
+        # エラーが出た場合でも、再試行しやすいようにメッセージを表示
         st.error(f"応答中にエラーが発生しました: {e}")
