@@ -63,6 +63,6 @@ try:
         with st.chat_message("model"):
             st.markdown(answer)
         st.session_state.messages.append({"role": "model", "content": answer})
-    except Exception as e:
+except Exception as e:
         # 万が一エラーが出た場合、その内容を表示します
         st.error(f"エラーが発生しました: {e}")
