@@ -54,13 +54,18 @@ if prompt := st.chat_input("質問を入力してください"):
     full_prompt = f"{st.session_state.sys_prompt}\n\nユーザーの質問: {prompt}"
 
     try:
-        # モデル名を最新の Gemini 3 Flash Preview に変更します
+        # モデル名を最新の Gemini 3 Flash Preview に変更
         response = client.models.generate_content(
             model="gemini-3-flash-preview", 
             contents=full_prompt
         )
         answer = response.text
         
+        # --- ここから追加：画面に回答を表示し、履歴に保存する ---
+        with st.chat_message("model"):
+            st.markdown(answer)
+        st.session_state.messages.append({"role": "model", "content": answer})
+        # --------------------------------------------------
+        
     except Exception as e:
-        # except も try と同じ位置に揃えます
         st.error(f"エラーが発生しました: {e}")
