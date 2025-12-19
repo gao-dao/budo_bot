@@ -9,14 +9,12 @@ st.caption("型稽古の力、術理について応答します。")
 
 # --- 1.5 チャット履歴クリア関数の定義 ---
 def clear_chat_history():
-    """セッションの状態をリセットし、新しいチャットを開始する"""
     if "messages" in st.session_state:
         del st.session_state["messages"]
     if "chat" in st.session_state:
         del st.session_state["chat"]
     st.rerun()
 
-# サイドバーにクリアボタンを配置
 with st.sidebar:
     st.title("設定")
     if st.button("💬 チャット履歴をクリア"):
@@ -25,76 +23,62 @@ with st.sidebar:
 # --- 2. Gemini クライアントの初期化 ---
 @st.cache_resource
 def get_gemini_client():
-    # APIキーの取得
     api_key = os.getenv("GEMINI_API_KEY") 
     if not api_key:
         try:
             api_key = st.secrets["GEMINI_API_KEY"]
         except KeyError:
-            st.error("エラー: APIキーが設定されていません。")
+            st.error("APIキーが設定されていません。")
             st.stop()
     
-    # 'v1'を指定して安定版にアクセス
-    from google.genai.types import HttpOptions
-    client = genai.Client(
-        api_key=api_key, 
-        http_options=HttpOptions(api_version="v1")
-    )
+    # 安定版の v1 を使用
+    client = genai.Client(api_key=api_key)
     return client
 
 client = get_gemini_client()
 MODEL_NAME = "gemini-1.5-flash"
 
-# --- 3. 知識ファイルの読み込みとチャットセッションの初期化 ---
+# --- 3. チャットセッションの初期化 ---
 if "messages" not in st.session_state:
     try:
         with open("budo_knowledge.txt", "r", encoding="utf-8") as f:
             knowledge_text = f.read()
     except FileNotFoundError:
-        st.error("知識ファイルが見つかりません。")
         knowledge_text = ""
 
-    # システム指示（キャラクター設定）の定義
-    sys_instruction = f"""
+    # キャラクター設定を「最初の指示」として定義
+    initial_prompt = f"""
     あなたは琉球古伝空手心勢会の代表です。
-    以下の知識ベースに基づき、誠実かつ簡潔に応答してください。
-    
-    【語尾のルール】
-    ・「〜なのです」「〜なのですよ」「〜ございます」は一切使わないでください。
-    ・「〜です」「〜ます」の形に統一し、格調高くも親しみやすい丁寧語で回答してください。
-    ・テキストのトーンを尊重しつつ、冗長な表現を避けてください。
+    以下のルールを厳守して応答してください。
 
-    知識ベースにない質問には、「その情報については、現在の知識ベースに含まれておりません」と応答してください。
-    最後に返答の内容の簡単なまとめもつけてください。
+    【語尾のルール】
+    ・「〜なのです」「〜なのですよ」「〜ございます」は一切使わず、「〜です」「〜ます」に統一してください。
+    ・格調高くも親しみやすい丁寧語で回答してください。
+
+    【回答の指針】
+    ・以下の知識ベースに基づき、誠実かつ簡潔に応答してください。
+    ・知識にない場合は「現在の知識ベースに含まれておりません」と答えてください。
+    ・最後に内容の簡単なまとめをつけてください。
 
     [武術知識ベース]
     {knowledge_text}
     """
     
-    # 【最重要】400エラー（名前変換ミス）を確実に回避する書き方
-    # configにクラス(GenerateContentConfig)を使わず、直接辞書(dict)で渡します
-    st.session_state.chat = client.chats.create(
-        model=MODEL_NAME,
-        config={
-            "system_instruction": sys_instruction
-        }
-    )
-    st.session_state.messages = [{"role": "model", "content": "ようこそ、術理探求の道へ。武術に関するご質問は何でしょうか？"}]
+    # エラーの元になる config 指定を避け、空の状態でチャットを開始
+    st.session_state.chat = client.chats.create(model=MODEL_NAME)
+    
+    # 最初の指示をAIに送り、設定を覚えさせる（画面には表示しない）
+    st.session_state.chat.send_message(initial_prompt)
+    
+    st.session_state.messages = [{"role": "model", "content": "ようこそ、心勢会へ。武術の術理について、何なりとお尋ねください。"}]
 
-
-# --- 4. 既存のチャット履歴の表示 ---
+# --- 4. 履歴表示と入力処理 ---
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- 5. ユーザー入力とAI応答の処理 ---
 with st.form(key="chat_form", clear_on_submit=True):
-    user_prompt = st.text_area(
-        "質問を入力してください", 
-        key="user_input_area",
-        height=100,
-        placeholder="武術に関するご質問を入力し、「質問を送信」ボタンを押してください。"
-    )
+    user_prompt = st.text_area("質問を入力してください", height=100)
     submitted = st.form_submit_button("質問を送信")
 
 if submitted and user_prompt:
@@ -104,10 +88,8 @@ if submitted and user_prompt:
 
     try:
         response = st.session_state.chat.send_message(user_prompt)
-        
         with st.chat_message("model"):
             st.markdown(response.text)
         st.session_state.messages.append({"role": "model", "content": response.text})
-        
     except Exception as e:
-        st.error(f"応答中にエラーが発生しました: {e}")
+        st.error(f"エラーが発生しました。履歴をクリアしてやり直してください: {e}")
