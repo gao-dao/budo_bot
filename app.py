@@ -54,8 +54,10 @@ if prompt := st.chat_input("質問を入力してください"):
     full_prompt = f"{st.session_state.sys_prompt}\n\nユーザーの質問: {prompt}"
 
     try:
+        # モデル名を 'models/' から始まるフルネームに変更します
+        # これで v1beta API でも正しく認識されます
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="models/gemini-1.5-flash", 
             contents=full_prompt
         )
         answer = response.text
@@ -63,6 +65,4 @@ if prompt := st.chat_input("質問を入力してください"):
             st.markdown(answer)
         st.session_state.messages.append({"role": "model", "content": answer})
     except Exception as e:
-        # 固定メッセージではなく、発生している「生のデータ」を表示させます
-        st.error(f"エラーの正体: {e}") 
-        st.info("この上の『エラーの正体』に何と書いてあるか教えてください。")
+        st.error(f"エラーの正体: {e}")
