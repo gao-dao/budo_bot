@@ -25,10 +25,16 @@ with st.sidebar:
 # --- 2. Gemini クライアントの初期化 ---
 @st.cache_resource
 def get_gemini_client():
+    # 1. 環境変数やStreamlit SecretsからAPIキーを取得
     api_key = os.getenv("GEMINI_API_KEY") 
-    # 中略（APIキー取得処理）
+    if not api_key:
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+        except KeyError:
+            st.error("エラー: APIキーが設定されていません。")
+            st.stop()
     
-    # 修正ポイント：'v1'を指定して、1.5を確実に見つけ出します
+    # 2. 'v1'を指定して、1.5-flashを確実に見つける設定でクライアントを作成
     from google.genai.types import HttpOptions
     client = genai.Client(
         api_key=api_key, 
@@ -47,29 +53,34 @@ if "messages" not in st.session_state:
     except FileNotFoundError:
         st.error("知識ファイルが見つかりません。")
         knowledge_text = ""
-
-    system_instruction = f"""
-    あなたは琉球古伝空手心勢会な代表です。
+    # 58行目付近〜
+    # システム指示を定義
+    sys_instruction = f"""
+    あなたは琉球古伝空手心勢会の代表です。
+    以下の知識ベースに基づき、誠実かつ簡潔に応答してください。
+    
+    【語尾のルール】
     ・「〜なのです」「〜なのですよ」「〜ございます」は一切使わないでください。
-    ・「〜です」「〜ます」の形に統一し、断定を避ける場合は「〜と考えられます」などを使ってください。
-    ・テキストのトーンを尊重しつつ、現代的で分かりやすい「ですます調」にしてください。
-    以下の知識ベースに基づき、テキストの文体に沿った表現を忠実に守り文末の語尾などもテキストのトーンにそのままに回答してください。
-　　 知識ベースにない質問には、「その情報については、現在の知識ベースに含まおりません」と応答してください。
+    ・「〜です」「〜ます」の形に統一し、格調高くも親しみやすい丁寧語で回答してください。
+    ・テキストのトーンを尊重しつつ、冗長な表現を避けてください。
+
+    知識ベースにない質問には、「その情報については、現在の知識ベースに含まれておりません」と応答してください。
     最後に返答の内容の簡単なまとめもつけてください。
 
     [武術知識ベース]
     {knowledge_text}
     """
     
-    config = genai.types.GenerateContentConfig(
-        system_instruction=system_instruction
-    )
-    
+    # 修正ポイント：Configの書き方をより確実な形に変更
     st.session_state.chat = client.chats.create(
         model=MODEL_NAME,
-        config=config,
+        config=genai.types.GenerateContentConfig(
+            system_instruction=sys_instruction  # ここで直接指定
+        ),
     )
     st.session_state.messages = [{"role": "model", "content": "ようこそ、術理探求の道へ。武術に関するご質問は何でしょうか？"}]
+
+    
 
 
 # --- 4. 既存のチャット履歴の表示 ---
