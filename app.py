@@ -53,8 +53,8 @@ if prompt := st.chat_input("質問を入力してください"):
     # 送信用にシステム指示を結合
     full_prompt = f"{st.session_state.sys_prompt}\n\nユーザーの質問: {prompt}"
 
-try:
-        # 2.0-flash-exp を使用して確実に通信を通します
+    try:
+        # 段落を if prompt の中に揃えます
         response = client.models.generate_content(
             model="gemini-2.0-flash-exp", 
             contents=full_prompt
@@ -63,6 +63,7 @@ try:
         with st.chat_message("model"):
             st.markdown(answer)
         st.session_state.messages.append({"role": "model", "content": answer})
-except Exception as e:
-        # 万が一エラーが出た場合、その内容を表示します
+        
+    except Exception as e:
+        # except も try と同じ位置に揃えます
         st.error(f"エラーが発生しました: {e}")
