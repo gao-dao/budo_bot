@@ -16,7 +16,7 @@ def clear_chat_history():
         del st.session_state["chat"]
     st.rerun()
 
-# サイドバーにクリアボタンを配置（または st.title の下などお好きな場所に）
+# サイドバーにクリアボタンを配置
 with st.sidebar:
     st.title("設定")
     if st.button("💬 チャット履歴をクリア"):
@@ -34,7 +34,7 @@ def get_gemini_client():
             st.error("エラー: APIキーが設定されていません。")
             st.stop()
     
-    # 2. 'v1'を指定して、1.5-flashを確実に見つける設定でクライアントを作成
+    # 'v1'を指定して、1.5-flashを確実に見つける設定でクライアントを作成
     from google.genai.types import HttpOptions
     client = genai.Client(
         api_key=api_key, 
@@ -53,7 +53,7 @@ if "messages" not in st.session_state:
     except FileNotFoundError:
         st.error("知識ファイルが見つかりません。")
         knowledge_text = ""
-    # 58行目付近〜
+
     # システム指示を定義
     sys_instruction = f"""
     あなたは琉球古伝空手心勢会の代表です。
@@ -71,16 +71,16 @@ if "messages" not in st.session_state:
     {knowledge_text}
     """
     
-    # 修正ポイント：Configの書き方をより確実な形に変更
+    # 【修正の核心】
+    # GenerateContentConfigを使わず、直接辞書で渡すことで
+    # "systemInstruction" という自動変換によるエラーを防ぎます。
     st.session_state.chat = client.chats.create(
         model=MODEL_NAME,
-        config=genai.types.GenerateContentConfig(
-            system_instruction=sys_instruction  # ここで直接指定
-        ),
+        config={
+            "system_instruction": sys_instruction
+        }
     )
     st.session_state.messages = [{"role": "model", "content": "ようこそ、術理探求の道へ。武術に関するご質問は何でしょうか？"}]
-
-    
 
 
 # --- 4. 既存のチャット履歴の表示 ---
