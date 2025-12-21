@@ -57,7 +57,7 @@ if prompt := st.chat_input("質問を入力してください"):
     try:
         # モデル名を最新の Gemini 3 Flash Preview に変更
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp", 
+            model="gemini-2.0-flash", 
             contents=full_prompt
         )
         answer = response.text
