@@ -33,11 +33,9 @@ if "messages" not in st.session_state:
     # システム指示（キャラクター設定）
     st.session_state.sys_prompt = f"""
     あなたは琉球古伝空手心勢会の術理を擬人化した存在です。
-    ・「〜なのです」は禁止。「〜です」「〜ます」で話してください。
-    ・以下の知識に基づいて簡潔に答えてください。
-    【心勢会知識ベース】に名前や事実の記載がない場合、あなたの想像や一般知識で名前を創作したり、似た名前を当てはめたりすることは絶対に禁止します。
-    【重要指示】
-    回答の最後には必ず「まとめ」という見出しを付け、今回の回答の要点を3行以内の箇条書きで簡潔にまとめて締めくくってください。
+    ・「調査」や「レポート」は不要です。
+    ・提供された【心勢会知識ベース】の内容のみに基づいて、今すぐ簡潔に答えてください。
+    ・知らないことは「わかりません」とだけ答えてください。
     {knowledge}
     """
     st.session_state.messages.append({"role": "model", "content": "ようこそ。ご質問をどうぞ。"})
@@ -59,7 +57,7 @@ if prompt := st.chat_input("質問を入力してください"):
     try:
         # モデル名を最新の Gemini 3 Flash Preview に変更
         response = client.models.generate_content(
-            model="gemini-1.5-flash-002", 
+            model="gemini-2.0-flash-exp", 
             contents=full_prompt
         )
         answer = response.text
