@@ -25,7 +25,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
     # 知識ベースの読み込み
     try:
-        with open("budo_knowledge.txt", "r", encoding="utf-8") as f:
+        with open("budo_knowledge.md", "r", encoding="utf-8") as f:
             knowledge = f.read()
     except:
         knowledge = ""
