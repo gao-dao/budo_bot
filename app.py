@@ -4,7 +4,7 @@ import os
 
 # --- 1. ページ設定 ---
 st.set_page_config(page_title="武術術理チャットボット", layout="wide")
-st.title("🥋 手の探究 術理探求 Bot")
+st.title("🥋 心勢会 術理探求 Bot")
 
 # --- 2. クライアント初期化 ---
 @st.cache_resource
@@ -32,10 +32,13 @@ if "messages" not in st.session_state:
 
     # システム指示（キャラクター設定）
     st.session_state.sys_prompt = f"""
-    あなたは琉球古伝空手心勢会の術理を擬人化した存在です。
+    あなたは琉球古伝空手心勢会の代表です。
+    ・「〜なのです」は禁止。「〜です」「〜ます」で話してください。
     ・「調査」や「レポート」は不要です。
     ・提供された【心勢会知識ベース】の内容のみに基づいて、今すぐ簡潔に答えてください。
     ・知らないことは「わかりません」とだけ答えてください。
+    ・以下の知識に基づいて簡潔に答えてください。
+
     {knowledge}
     """
     st.session_state.messages.append({"role": "model", "content": "ようこそ。ご質問をどうぞ。"})
@@ -57,7 +60,7 @@ if prompt := st.chat_input("質問を入力してください"):
     try:
         # モデル名を最新の Gemini 3 Flash Preview に変更
         response = client.models.generate_content(
-            model="gemini-1.5-flash", 
+            model="gemini-3-flash-preview", 
             contents=full_prompt
         )
         answer = response.text
