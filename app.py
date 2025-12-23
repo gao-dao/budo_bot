@@ -4,7 +4,7 @@ import os
 
 # --- 1. ページ設定 ---
 st.set_page_config(page_title="武術術理チャットボット", layout="wide")
-st.title("🥋 心勢会 術理探求 Bot")
+st.title("🥋 手の探究 術理探求 Bot")
 
 # --- 2. クライアント初期化 ---
 @st.cache_resource
