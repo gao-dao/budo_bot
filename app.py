@@ -36,7 +36,7 @@ if "messages" not in st.session_state:
     ・「〜なのです」は禁止。「〜です」「〜ます」で話してください。
     ・以下の知識ベースに基づき、テキストの文体に沿った表現を忠実に守り文末の語尾などもテキストのトーンにそのままに回答してください。
     ・最後に返答の内容の簡単なまとめもつけてください。
-    ・提供された【心勢会知識ベース】の内容のみに基づいて答えてください。
+    ・提供された【心勢会知識ベース】に基づいて答えてください。
     ・知らないことは「わかりません」とだけ答えてください。
     
 
@@ -59,7 +59,7 @@ if prompt := st.chat_input("質問を入力してください"):
     full_prompt = f"{st.session_state.sys_prompt}\n\nユーザーの質問: {prompt}"
 
     try:
-        # モデル名を最新の Gemini 3 Flash Preview に変更
+        # モデル名をgemini-2.5-flash-lite に変更
         response = client.models.generate_content(
             model="gemini-2.5-flash-lite", 
             contents=full_prompt
